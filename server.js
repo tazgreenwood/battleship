@@ -17,18 +17,23 @@ io.on('connection', function(socket) {
     console.log("Finding Match For", socket.id);
     matchmaking(socket);
   });
+
   socket.on('guess', function(data) {
-    console.log(data.cell);
+    console.log("guess data:\n",data);
+    // console.log("guess state:\n",games[data.gameID]);
     var game = games[data.gameID];
-    if (data.pID === game.p1) {
+    if (data.pID === game.p1.id) {
       game.p2.emit('guess', { guess: data.cell });
     } else {
       game.p1.emit('guess', { guess: data.cell });
     }
-  })
+  });
+
   socket.on('hit', function(data) {
+    console.log("hit data:\n",data);
+    // console.log("hit state:\n",games[data.gameID]);
     var game = games[data.gameID];
-    if (data.pID === game.p1) {
+    if (data.pID !== game.p1.id) {
       console.log("p1 hit p2");
       game.p1.emit('hit');
       game.p2.emit('your turn');
@@ -39,10 +44,13 @@ io.on('connection', function(socket) {
       game.p1.emit('your turn');
       game.p2.emit('opp turn');
     }
-  })
+  });
+
   socket.on('miss', function(data) {
+    console.log("miss data:\n",data);
+    // console.log("miss state:\n",games[data.gameID]);
     var game = games[data.gameID];
-    if (data.pID === game.p1) {
+    if (data.pID !== game.p1.id) {
       console.log("p1 miss p2");
       game.p1.emit('miss');
       game.p2.emit('your turn');
@@ -53,7 +61,8 @@ io.on('connection', function(socket) {
       game.p1.emit('your turn');
       game.p2.emit('opp turn');
     }
-  })
+  });
+
 })
 
 http.listen(3000, function() {
